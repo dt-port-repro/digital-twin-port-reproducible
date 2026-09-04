@@ -1,0 +1,16 @@
+[
+  {
+    "method": "\u4e09\u9636\u6bb5\u60e9\u7f5a\u51fd\u6570\u9009\u4f4d",
+    "avg_penalty": 0.0567,
+    "std_penalty": 0.0,
+    "total_time_s": 70.29,
+    "n_selected": 3000
+  },
+  {
+    "method": "FCFS\u968f\u673a\u57fa\u7ebf",
+    "avg_penalty": 0.2037,
+    "std_penalty": 0.0744,
+    "total_time_s": 30.7,
+    "n_selected": 3000
+  }
+]

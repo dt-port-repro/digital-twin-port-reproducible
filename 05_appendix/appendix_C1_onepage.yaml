@@ -1,0 +1,53 @@
+# 附录C.1 数据适配器配置模板（一页版）
+
+adapter_name: "adapter"
+version: "1.0.0"
+
+target_system: {type: TOS, vendor: "<厂商>", product: "<系统名>"}
+
+connection:
+  protocol: REST_API
+  base_url: "<API地址>"
+  auth: {type: OAuth2, client_id: "<客户端ID>", secret: "${SECRET}"}
+  timeout: 30
+  retry: {max: 3, backoff: 1.5}
+
+sync: {interval: 60, batch_size: 1000, initial_load: true}
+
+mapping:
+  container:
+    table: "<源表>"
+    fields: {id, weight, size, type}
+    transform:
+      - {field: weight, mul: 0.4536}
+      - {field: size, enum: [20, 40, 45]}
+
+  vessel:
+    table: "<源表>"
+    fields: {id, eta, etd, berth}
+    time_format: "yyyy-MM-dd HH:mm:ss"
+    timezone: "Asia/Shanghai"
+
+  yard:
+    table: "<源表>"
+    fields: {block, bay, row, tier, container_id, status}
+    transform:
+      - {field: status, map: {A: OCCUPIED, R: RESERVED, E: FREE}}
+
+validation:
+  required: [container_id, size, weight]
+  rules:
+    - {type: range, field: weight, min: 0, max: 30000}
+    - {type: not_null, field: container_id}
+    - {type: enum, field: size, values: [20, 40, 45]}
+
+error_handling:
+  on_failure: retry_and_log
+  max_skip: 10
+  alert: [connection_failure, data_corruption, schema_mismatch]
+  notify: {email: "<邮箱>", webhook: "<告警URL>"}
+
+performance:
+  prefetch: {enabled: true, lookahead: 100}
+  caching: {enabled: true, ttl: 300, max_size: 10000}
+  compression: true

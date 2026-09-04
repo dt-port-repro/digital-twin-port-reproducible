@@ -1,0 +1,54 @@
+{
+  "w1": {
+    "prediction": {
+      "mae": 1841.53,
+      "rmse": 2332.4,
+      "mape": 4.26,
+      "picp": 87.4,
+      "interval_width": 9131.76,
+      "time_s": 2.82
+    },
+    "baseline": {
+      "avg_penalty": 0.1386,
+      "congestion_risk": 0.2078,
+      "reshuffle_pct": 7.09,
+      "equip_util_pct": 60.82,
+      "plan_stability": 0.9919,
+      "plan_adjust_rate": 0.81
+    },
+    "with_prediction": {
+      "avg_penalty": 0.1361,
+      "congestion_risk": 0.2042,
+      "reshuffle_pct": 7.11,
+      "equip_util_pct": 60.86,
+      "plan_stability": 0.9915,
+      "plan_adjust_rate": 0.85
+    }
+  },
+  "w2": {
+    "prediction": {
+      "mae": 2042.86,
+      "rmse": 2501.73,
+      "mape": 4.59,
+      "picp": 86.5,
+      "interval_width": 8112.85,
+      "time_s": 3.34
+    },
+    "baseline": {
+      "avg_penalty": 0.1386,
+      "congestion_risk": 0.2078,
+      "reshuffle_pct": 7.09,
+      "equip_util_pct": 60.82,
+      "plan_stability": 0.9919,
+      "plan_adjust_rate": 0.81
+    },
+    "with_prediction": {
+      "avg_penalty": 0.1395,
+      "congestion_risk": 0.2371,
+      "reshuffle_pct": 6.89,
+      "equip_util_pct": 60.51,
+      "plan_stability": 0.9919,
+      "plan_adjust_rate": 0.81
+    }
+  }
+}

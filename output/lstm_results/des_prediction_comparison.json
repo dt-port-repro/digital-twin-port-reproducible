@@ -1,0 +1,20 @@
+{
+  "scenario": "\u5e38\u89c4\u4f5c\u4e1a",
+  "n_days": 30,
+  "n_runs": 3,
+  "baseline": {
+    "turnaround_h": 21.099999999999998,
+    "reshuffle_pct": 5.2,
+    "equip_util_pct": 61.53333333333333
+  },
+  "prediction": {
+    "turnaround_h": 21.133333333333333,
+    "reshuffle_pct": 5.2,
+    "equip_util_pct": 61.5
+  },
+  "improvement": {
+    "turnaround": -0.2,
+    "reshuffle": 0.0,
+    "equip_util": -0.1
+  }
+}

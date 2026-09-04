@@ -1,0 +1,135 @@
+{
+  "summary": {
+    "ARIMA": {
+      "mae": 2239.88,
+      "rmse": 2695.79,
+      "mape": 5.22,
+      "picp": 64.0,
+      "time_s": 0.15
+    },
+    "Prophet": {
+      "mae": 2364.61,
+      "rmse": 2842.96,
+      "mape": 5.45,
+      "picp": 47.8,
+      "time_s": 0.02
+    },
+    "LSTM": {
+      "mae": 2358.27,
+      "rmse": 2843.46,
+      "mape": 5.36,
+      "picp": 12.1,
+      "time_s": 2.73
+    },
+    "Transformer": {
+      "mae": 2154.41,
+      "rmse": 2738.8,
+      "mape": 4.96,
+      "picp": 57.8,
+      "time_s": 4.37
+    },
+    "\u672c\u6587\u6a21\u578b": {
+      "mae": 1960.2,
+      "rmse": 2415.68,
+      "mape": 4.47,
+      "picp": 41.8,
+      "time_s": 4.52
+    }
+  },
+  "windows": {
+    "w1": {
+      "ARIMA": {
+        "metrics": {
+          "mae": 2430.12,
+          "rmse": 2965.99,
+          "mape": 5.83
+        },
+        "picp": 65.6,
+        "time_s": 0.08
+      },
+      "Prophet": {
+        "metrics": {
+          "mae": 1890.1,
+          "rmse": 2413.03,
+          "mape": 4.53
+        },
+        "picp": 65.3,
+        "time_s": 0.01
+      },
+      "LSTM": {
+        "metrics": {
+          "mae": 2542.48,
+          "rmse": 3060.71,
+          "mape": 5.88
+        },
+        "picp": 6.5,
+        "time_s": 1.58
+      },
+      "Transformer": {
+        "metrics": {
+          "mae": 1873.67,
+          "rmse": 2373.73,
+          "mape": 4.37
+        },
+        "picp": 57.5,
+        "time_s": 2.06
+      },
+      "\u672c\u6587\u6a21\u578b": {
+        "metrics": {
+          "mae": 1975.9,
+          "rmse": 2473.35,
+          "mape": 4.56
+        },
+        "picp": 36.4,
+        "time_s": 1.89
+      }
+    },
+    "w2": {
+      "ARIMA": {
+        "metrics": {
+          "mae": 2049.64,
+          "rmse": 2425.59,
+          "mape": 4.61
+        },
+        "picp": 62.5,
+        "time_s": 0.07
+      },
+      "Prophet": {
+        "metrics": {
+          "mae": 2839.13,
+          "rmse": 3272.89,
+          "mape": 6.37
+        },
+        "picp": 30.2,
+        "time_s": 0.01
+      },
+      "LSTM": {
+        "metrics": {
+          "mae": 2174.05,
+          "rmse": 2626.21,
+          "mape": 4.83
+        },
+        "picp": 17.7,
+        "time_s": 1.15
+      },
+      "Transformer": {
+        "metrics": {
+          "mae": 2435.16,
+          "rmse": 3103.87,
+          "mape": 5.55
+        },
+        "picp": 58.1,
+        "time_s": 2.31
+      },
+      "\u672c\u6587\u6a21\u578b": {
+        "metrics": {
+          "mae": 1944.51,
+          "rmse": 2358.02,
+          "mape": 4.38
+        },
+        "picp": 47.2,
+        "time_s": 2.63
+      }
+    }
+  }
+}

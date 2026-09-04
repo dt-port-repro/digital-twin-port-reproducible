@@ -1,0 +1,23 @@
+[
+  {
+    "method": "FCFS先到先得",
+    "avg_penalty": 0.1695,
+    "std_penalty": 0.0713,
+    "n_selected": 1800,
+    "total_time_s": 0.03
+  },
+  {
+    "method": "三阶段惩罚选位",
+    "avg_penalty": 0.1121,
+    "std_penalty": 0.0529,
+    "n_selected": 1800,
+    "total_time_s": 0.05
+  },
+  {
+    "method": "三阶段+虚拟占位",
+    "avg_penalty": 0.1121,
+    "std_penalty": 0.0529,
+    "n_selected": 1800,
+    "total_time_s": 0.05
+  }
+]

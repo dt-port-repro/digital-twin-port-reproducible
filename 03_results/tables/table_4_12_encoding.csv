@@ -1,0 +1,4 @@
+vessel_code,A_fitness,B_mean_fitness,B_std,C_fitness,delta_CvsA_pct
+CNCT,0.6919,-0.2558,0.0476,0.7063,2.08
+CGAMV,0.4778,-1.7897,0.0329,0.486,1.72
+APESP,0.4522,-1.9966,0.03,0.4626,2.28

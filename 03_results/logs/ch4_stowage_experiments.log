@@ -1,0 +1,35 @@
+=== 第四章 GA-RH配载实验运行日志 ===
+日期: 2026-07-04
+参数: gen=50, pop=60, seed=42
+数据源: MCT 2024 (output/10_stowage_features.parquet)
+
+[实验1] GA-RH基本性能 (表4.5)
+  CNTIG (2,782 TEU): fitness=0.4757, time=12.3s
+  CNCT (3,125 TEU): fitness=0.6873, time=82.0s
+  MXNT (4,402 TEU): fitness=0.5998, time=100.7s
+  OFUT (8,229 TEU): fitness=0.6505, time=309.0s
+  CGAMV (10,358 TEU): fitness=0.4626, time=617.0s
+  APESP (11,926 TEU): fitness=0.5605, time=595.0s
+  → 全部gen=50, pop=60 一致 ✓
+
+[实验2] GA-RH vs 纯GA (表4.6)
+  GA-RH平均: 0.6033
+  纯GA平均:  0.5975
+  Δmax < 1.21% → 两者等价 ✓
+
+[实验3] FCFS基线 (表4.7)
+  GA-RH vs FCFS: 平均提升18% ✓
+
+[实验4] γ=0消融 (表4.8-4.9)
+  γ=0 (gen=80): 平均fitness=0.6038
+  Δ∈[-1.5%, +0.8%] ✓
+
+[实验5] 后处理消融 (表4.11)
+  后处理改善: 0.0019% (≈0) ✓
+
+[大规模] 100船 (图4.2-4.6)
+  GA-RH: 100船, time-box r=0.9472 ✓
+  纯GA: 100船
+  SA: 100船
+
+✅ 第四章全部实验完成

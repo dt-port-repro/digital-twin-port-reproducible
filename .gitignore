@@ -1,0 +1,63 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+_temp_*.docx
+_temp_*.pdf
+*.tmp
+~$*
+
+# Large MCT raw data files — kept on disk only
+# These are proprietary MCT operational data, not suitable for git
+# See Data_Availability_Statement.md for details
+01_data/raw_data/
+
+# Large processed parquet files (regenerable from raw data)
+01_data/processed_data/01_vessels.parquet
+01_data/processed_data/02_bay_structure.parquet
+01_data/processed_data/03_berth_plan.parquet
+01_data/processed_data/05_export_manifest.parquet
+01_data/processed_data/06_movement_events.parquet
+01_data/processed_data/06_yard_definition.parquet
+01_data/processed_data/07_yard_cells.parquet
+01_data/processed_data/08_containers.parquet
+01_data/processed_data/cleaning_report.json
+01_data/processed_data/data_quality_full_report.json
+01_data/processed_data/data_quality_report.json
+
+# Keep sample CSVs un-ignored (they're small + show structure)
+!01_data/processed_data/samples/
+
+# Experiment-copied parquet data (regenerable)
+experiments/chapter4/data/
+experiments/chapter4/results/*.parquet
+experiments/chapter4/results/test_*.parquet
+experiments/chapter5/data/
+experiments/chapter5/output/verified/
+
+# Large output files (regenerable)
+output/10_*.parquet
+output/ch4_unified_results.parquet
+output/appendix_C1_*.yaml
+
+# Large experiment files
+experiments/chapter6/scripts/exp6_backtest_integrated.py
+
+# Docx files
+*.docx
+# 例外：论文附录C承诺的《论文核心公式推导》文档（随包发布）
+!04_derivations/论文核心公式推导.docx
+
+# 大文件转夸克分发（不发布GitHub）
+data/
+output/10_stowage_features.parquet
+experiments/chapter4/data/

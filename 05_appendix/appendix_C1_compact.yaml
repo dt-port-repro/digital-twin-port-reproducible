@@ -1,0 +1,81 @@
+# 附录C.1 数据适配器配置模板（压缩版）
+
+adapter_name: "adapter"
+version: "1.0.0"
+
+target_system:
+  type: "TOS"
+  vendor: "<厂商>"
+  product: "<系统名>"
+
+connection:
+  protocol: "REST_API"
+  base_url: "<API地址>"
+  authentication:
+    type: "OAuth2"
+    client_id: "<客户端ID>"
+    client_secret: "${SECRET}"
+  timeout: 30
+  retry:
+    max_attempts: 3
+    backoff_factor: 1.5
+
+sync:
+  interval: 60
+  initial_load: true
+  batch_size: 1000
+
+mapping:
+  container:
+    source_table: "<源表>"
+    field_mapping:
+      container_id: "<字段>"
+      weight: "<字段>"
+      size: "<字段>"
+      type: "<字段>"
+    transformation:
+      - field: "weight"
+        multiplier: 0.453592    # 单位转换
+      - field: "size"
+        value_mapping: [20, 40, 45]
+
+  vessel_schedule:
+    source_table: "<源表>"
+    field_mapping:
+      vessel_id: "<字段>"
+      eta: "<字段>"
+      etd: "<字段>"
+      berth_id: "<字段>"
+    time_format: "yyyy-MM-dd HH:mm:ss"
+    timezone: "Asia/Shanghai"
+
+  yard_status:
+    source_table: "<源表>"
+    field_mapping:
+      block_id: "<字段>"
+      bay: "<字段>"
+      row: "<字段>"
+      tier: "<字段>"
+      container_id: "<字段>"
+      status: "<字段>"
+    transformation:
+      - field: "status"
+        value_mapping: {"A": "OCCUPIED", "R": "RESERVED", "E": "FREE"}
+
+validation:
+  required_fields: ["container_id", "size", "weight"]
+  rules:
+    - {type: "range", field: "weight", min: 0, max: 30000}
+    - {type: "not_null", field: "container_id"}
+    - {type: "enum", field: "size", values: [20, 40, 45]}
+
+error_handling:
+  on_failure: "retry_and_log"
+  max_skip: 10
+  alert_on: ["connection_failure", "data_corruption", "schema_mismatch"]
+  notify: {email: "<邮箱>", webhook: "<告警地址>"}
+
+performance:
+  prefetch: {enabled: true, lookahead: 100}
+  caching: {enabled: true, ttl: 300, max_size: 10000}
+  compression: true

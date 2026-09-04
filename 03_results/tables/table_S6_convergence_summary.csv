@@ -1,0 +1,5 @@
+﻿vessel,n_containers,method,n_runs,fitness_mean,fitness_std,f1_mean,f2_mean,time_s_mean
+CNCT,795,GA-RH,5,0.6864,0.0045,0.7306,0.7092,81.7
+CNCT,795,纯GA,5,0.6891,0.0103,0.7332,0.694,80.1
+CGAMV,2993,GA-RH,5,0.4711,0.0025,0.6034,0.5911,617.2
+CGAMV,2993,纯GA,5,0.4733,0.0044,0.6033,0.5912,586.7

@@ -1,0 +1,4 @@
+method,penalty_reduction_pct,std_reduction_pct
+FCFS先到先得,0.0,0.0
+三阶段惩罚选位,33.9,25.8
+三阶段+虚拟占位,33.9,25.8

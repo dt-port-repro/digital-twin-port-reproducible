@@ -1,0 +1,128 @@
+# 附录C.1 数据适配器配置文件示例（YAML格式）
+# 面向 Navis N4 TOS 系统的数据适配器配置模板
+# 展示协议配置、字段映射、数据校验和错误处理等设计
+
+adapter_name: "navis_n4_adapter"
+version: "1.0.0"
+
+target_system:
+  type: "TOS"
+  vendor: "Navis"
+  product: "N4"
+  version: "3.2"
+
+# ── 接入配置 ───────────────────────────────────
+connection:
+  protocol: "REST_API"
+  base_url: "http://10.10.1.100:8080/n4/api"
+
+  authentication:
+    type: "OAuth2"
+    token_url: "http://10.10.1.100:8080/auth/token"
+    client_id: "digital_twin_client"
+    client_secret: "${CLIENT_SECRET}"   # 从环境变量读取
+
+  timeout: 30
+  retry:
+    max_attempts: 3
+    backoff_factor: 1.5
+
+# ── 数据同步配置 ───────────────────────────────
+sync:
+  interval: 60              # 同步间隔（秒）
+  initial_load: true        # 启动时是否加载历史数据
+  batch_size: 1000          # 批量拉取大小
+
+# ── 数据映射规则 ───────────────────────────────
+mapping:
+  # 集装箱映射
+  container:
+    source_table: "CONTAINER_INFO"
+    field_mapping:
+      container_id: "CNTR_NBR"
+      size: "CNTR_SZ"                # 20, 40, 45
+      type: "CNTR_TYPE"              # DRY, REF, DNG
+      weight: "GROSS_WT"
+      owner: "OWNER_CD"
+      destination_port: "POD_CD"
+      iso_code: "ISO_CD"
+    transformation:
+      - field: "weight"
+        unit_conversion: "lbs_to_kg"  # 磅转公斤
+        multiplier: 0.453592
+      - field: "size"
+        value_mapping:
+          "20": "20FT"
+          "40": "40FT"
+          "45": "45FT"
+
+  # 船舶计划映射
+  vessel_schedule:
+    source_table: "VESSEL_VISIT"
+    field_mapping:
+      vessel_id: "VSL_CD"
+      vessel_name: "VSL_NAME"
+      eta: "EST_ARR_DT"
+      etd: "EST_DEP_DT"
+      berth_id: "BERTH_NO"
+      operator: "OPR_CD"
+    time_format: "yyyy-MM-dd HH:mm:ss"
+    timezone: "Asia/Shanghai"
+
+  # 堆场状态映射
+  yard_status:
+    source_table: "YARD_INVENTORY"
+    field_mapping:
+      block_id: "BLOCK_ID"
+      bay: "BAY_NO"
+      row: "ROW_NO"
+      tier: "TIER_NO"
+      container_id: "CNTR_NBR"
+      status: "CNTR_STS"             # OCCUPIED, RESERVED, FREE
+    transformation:
+      - field: "status"
+        value_mapping:
+          "A": "OCCUPIED"            # 在箱
+          "R": "RESERVED"            # 预留
+          "E": "FREE"                # 空闲
+
+# ── 数据校验规则 ───────────────────────────────
+validation:
+  required_fields:
+    - "container_id"
+    - "size"
+    - "weight"
+
+  data_quality:
+    - type: "range_check"
+      field: "weight"
+      min: 0
+      max: 30000
+    - type: "not_null"
+      field: "container_id"
+    - type: "enum_check"
+      field: "size"
+      allowed_values: [20, 40, 45]
+
+# ── 异常处理 ──────────────────────────────────
+error_handling:
+  on_failure: "retry_and_log"        # retry, skip, fail
+  max_skip_count: 10
+  alert_on:
+    - "connection_failure"
+    - "data_corruption"
+    - "schema_mismatch"
+  notification:
+    email: "admin@port.com"
+    webhook: "http://monitor.port.com/alerts"
+
+# ── 性能优化 ──────────────────────────────────
+performance:
+  prefetch:
+    enabled: true
+    lookahead: 100
+  caching:
+    enabled: true
+    ttl: 300                          # 缓存有效期（秒）
+    max_size: 10000
+  compression: true                   # 启用数据传输压缩
