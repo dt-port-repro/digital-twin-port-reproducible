@@ -159,16 +159,13 @@ python experiments/chapter5/scripts/17_ppo_coordinator.py   # PPO协调器 -> �
 
 | 场景 | 配置 | 仿真参数 | 对应 |
 |------|------|---------|------|
-| 常规作业 | A/B/C/D | 30天×10轮, ~3.1艘/天 | 表6.1/图6.2 |
-| 高峰压力 | A/B/C/D | 30天×10轮, ~7.8艘/天 | 表6.2/图6.3 |
-| 异常情况 | A/B/C/D | 30天×10轮, 故障率1.5% | 表6.3/图6.4 |
+| 常规作业 | A/B/C/D | 30天×10轮, ~594艘/30天 | 表6.1/图6.2 |
+| 高峰压力 | A/B/C/D | 30天×10轮, ~1,559艘/30天 | 表6.2/图6.3 |
+| 异常情况 | A/B/C/D | 30天×10轮, QC/YC故障率1.5% | 表6.3/图6.4 |
 
 ```bash
-# 一键运行全部仿真
+# 一键运行全部仿真（MAS-DES，论文表6.1-6.3 数据源）
 python 02_code/simulation/run_scenarios.py
-
-# 或使用原始仿真脚本
-python experiments/chapter6/scripts/exp6_complete.py
 ```
 
 ---

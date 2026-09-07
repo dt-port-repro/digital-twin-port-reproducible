@@ -4,6 +4,14 @@
 - 所有性能改善参数均来自第四、五章真实实验数据
 - 翻箱率、船时、设备利用率的baseline来自MCT实际运营统计
 - 优化效果基于GA-RH配载、三阶段堆场选位、PPO协调的实验结果估算
+
+⚠️ 定位说明（重要）：
+本脚本为早期参数化估算模型（非高保真 MAS-DES），其输出
+（exp6_sim_*.parquet / exp6_simulation_summary.parquet）为估算参考值，
+**不是论文表6.1-6.3 的数据源**。论文表6.1-6.3 以
+02_code/simulation/run_scenarios.py 的 MAS-DES 输出
+（canonical/sim_all_cfgall_d30r10.parquet）为准。场景参数（如异常场景
+设备故障率）亦以 run_scenarios.py 为准。
 """
 import pandas as pd, numpy as np, json
 from pathlib import Path

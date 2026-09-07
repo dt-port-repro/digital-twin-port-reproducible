@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """生成第六章DES仿真三场景配套表 S14/S15/S16
 
+⚠️ 废弃说明（重要）：
+本脚本读取早期参数化估算输出 exp6_sim_*.parquet（见 exp6_simulation.py），
+与论文表6.1-6.3 的 MAS-DES 数据（run_scenarios.py → canonical/sim_all_cfgall_d30r10.parquet）
+**不同源**，生成结果仅作历史参考，不纳入论文表格体系，已从 run_all 管线移除。
+
 数据来源: experiments/chapter6/results/exp6_sim_*.parquet
 
 配套表:

@@ -209,7 +209,7 @@ if not args.quick:
         'visualization/gen_fig6_3.py': '图6.4异常场景对比',
         'visualization/gen_table6_4.py': '表6.4统计检验',
         'visualization/gen_table_S13.py': '表S13 PPO',
-        'visualization/gen_des_scenario_tables.py': '表6.1-6.3场景汇总',
+        'visualization/gen_des_scenario_tables.py': '历史估算表生成(已废弃,非论文表6.1-6.3)',
     }
     for rel, label in viz_checks.items():
         check((CODE / rel).exists(), label)

@@ -104,8 +104,6 @@ def pipeline_viz():
          "图6.4 异常场景对比"),
         (ROOT / "02_code" / "visualization" / "gen_table6_4.py",
          "表6.4 统计检验"),
-        (ROOT / "02_code" / "visualization" / "gen_des_scenario_tables.py",
-         "表6.1-6.3 + S14-S16 DES表"),
     ]
     for script_path, label in viz_scripts:
         if script_path.exists():
