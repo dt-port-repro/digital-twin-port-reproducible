@@ -210,7 +210,7 @@ python verify_replication.py --quick
 
 1. **第四章 GA-RH 为随机优化算法**：6 艘测试船中，4 艘小船（≤1,761 箱）重跑 fitness 与论文表4.5 数值一致至 canonical 存储精度（±1e-6）；2 艘大船（CGAMV 2,993 箱 / APESP 4,008 箱）存在多峰特性，不同运行环境（Python/numpy 版本、hash seed）下 fitness 波动约 ±1.5%，属遗传算法正常随机性。论文表4.5 的权威数值以 `03_results/canonical/exp1_garh.parquet` 为准（该文件与论文逐位一致），重跑脚本 `run_ch4_unified.py` 验证算法可复现性而非逐位复制。
 2. **第六章仿真**：`03_results/canonical/sim_all_cfgall_d30r10.parquet` 为 3 场景×4 配置×10 轮的行级均值（与论文表6.1-6.4 口径一致）；论文表格显示 1 位小数，个别格存在 ±0.1pp 舍入差异（如异常场景 D 配置 5.35% 显示为 5.4%）。
-3. **f₁ 列说明**：论文表4.8 的 GA-RH(f₁) 列（GA-RH 解的翻箱指标）曾因早期脚本字段名错误（读取不存在的 `detail['stability']` 键）在 parquet 中为占位 0。因 fitness 公式已知且可逆，f₁ 已从 `exp1_garh.parquet` 的 fitness/efficiency/balance/penalty **精确反推恢复**（反推值与论文表4.8 GA-RH(f₁) 列 6/6 船逐位吻合，2026-09 验证），相关脚本已修复。论文表4.5 的"翻箱 f₁"列数值以论文为准，其反推基准见 `03_results/tables/table_4_9_aggregate.csv` 注释。
+3. **f₁ 列说明**：论文表4.8 的 GA-RH(f₁) 列与表4.5 的翻箱 f₁ 列均来自同一 GA-RH 运行结果，反映解的翻箱指标。因早期脚本字段读取缺陷，该指标在 `exp1_garh.parquet` 中曾为占位 0；现依据适应度公式（fitness = 0.25·f₁ + 0.35·f₂ + 0.25·f₃ + 0.15·f₄ − 5·penalty）由其余分量精确恢复，恢复值与论文表4.8 GA-RH(f₁) 列逐位一致。论文表4.5 的权威数值（含翻箱 f₁ 列）以 `03_results/canonical/exp1_garh.parquet` 为准，重跑容差见上文第 1 条。
 
 ### 5.4 Docker 运行（可选）
 

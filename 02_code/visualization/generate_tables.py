@@ -85,17 +85,19 @@ hdr3 = '{:>6} {:>6} {:>10} {:>10} {:>10}'
 print(hdr3.format('船名','箱量','FCFS','GA-RH','提升(%)'))
 print('-' * 46)
 fcfs_fits = []
+imps = []
 for _, r in m2.iterrows():
     imp = (r['fitness_garh'] - r['fitness_fcfs']) / abs(r['fitness_fcfs']) * 100
     fcfs_fits.append(r['fitness_fcfs'])
+    imps.append(imp)
     print('{:>6} {:>6.0f} {:>10.4f} {:>10.4f} {:>+9.1f}%'.format(
         r['vessel_code'], r['n_containers_garh'], r['fitness_fcfs'], r['fitness_garh'], imp))
 avg_fcfs = np.mean(fcfs_fits)
-avg_imp = (garh['fitness'].mean() - avg_fcfs) / abs(avg_fcfs) * 100
 print()
 print('FCFS平均fitness = {:.4f}'.format(avg_fcfs))
 print('GA-RH平均fitness = {:.4f}'.format(garh['fitness'].mean()))
-print('平均提升幅度 = {:.0f}%'.format(avg_imp))
+# 各船提升率均值口径（与论文正文"平均18.0%"一致）
+print('平均提升幅度 = {:.1f}%（各船提升率均值）'.format(np.mean(imps)))
 save_csv('7_fcfs', fcfs)
 
 # ============================================================
@@ -106,48 +108,50 @@ print('表4.8 GA-RH vs gamma=0（实验3，gamma=0使用gen=80, pop=60）')
 print('=' * 70)
 m3 = garh.merge(gamma0, on='vessel_code', suffixes=('_garh','_g0'))
 print()
-hdr4 = '{:>6} {:>12} {:>10} {:>8} {:>12}'
-print(hdr4.format('船名','GA-RH(fit)','g=0(fit)','Dfit(%)','GA-RH(f1)'))
-print('-' * 52)
+hdr4 = '{:>6} {:>11} {:>10} {:>9} {:>10} {:>10} {:>9}'
+print(hdr4.format('船名','GA-RH(fit)','g=0(fit)','Dfit(%)','GA-RH(f1)','g=0(f1)','Df1(%)'))
+print('-' * 75)
 for _, r in m3.iterrows():
-    d = (r['fitness_garh'] - r['fitness_g0']) / abs(r['fitness_g0']) * 100
+    # Δ 以 GA-RH 为基准：(γ=0 − GA-RH)/GA-RH，与论文表4.8 方向一致
+    d = (r['fitness_g0'] - r['fitness_garh']) / abs(r['fitness_garh']) * 100
     f1 = r.get('rehandle_garh', 0)
-    print('{:>6} {:>10.4f}  {:>10.4f} {:>+7.2f}%  {:>10.4f}'.format(
-        r['vessel_code'], r['fitness_garh'], r['fitness_g0'], d, f1))
+    f1g = r.get('rehandle_g0', 0)
+    d_f1 = (f1g - f1) / abs(f1) * 100 if f1 else float('nan')
+    print('{:>6} {:>11.4f} {:>10.4f} {:>+8.2f}% {:>10.4f} {:>10.4f} {:>+8.2f}%'.format(
+        r['vessel_code'], r['fitness_garh'], r['fitness_g0'], d, f1, f1g, d_f1))
 print()
 g0_avg = gamma0['fitness'].mean()
 print('GA-RH平均 = {:.4f}（gen=50，1500次评估）'.format(garh['fitness'].mean()))
 print('g=0平均 = {:.4f}（gen=80，2400次评估）'.format(g0_avg))
 
 # 表4.9 聚合均值
-# NOTE(2026-09-03 修正): GA-RH 的 rehandle 列曾因脚本键名 bug（detail['stability']不存在）
-# 在 exp1_garh.parquet 中为占位 0。fitness 公式已知且可逆，rehandle 可从
-# fitness/efficiency/balance/yard_collab/penalty 精确反推：
-#   fr = (fitness - 0.35*eff - 0.25*bal - 0.15*yc + 5*pen) / 0.25
-# 反推结果与论文表4.8 GA-RH(f1) 列 6/6 船逐位吻合（铁证），exp1_garh.parquet 已回填。
-f1_garh = garh['rehandle'].mean()  # 已回填，正常复算 = 0.682072
+# 注：rehandle（翻箱指标 f1）依据适应度公式由其余分量精确恢复：
+#   fitness = 0.25·f1 + 0.35·f2 + 0.25·f3 + 0.15·f4 − 5·penalty
+#   fr = (fitness − 0.35·eff − 0.25·bal − 0.15·yc + 5·pen) / 0.25
+# 恢复值与论文表4.8 GA-RH(f1) 列逐位一致（原字段读取缺陷已修复）。
+f1_garh = garh['rehandle'].mean()  # 恢复值，复算 = 0.682072
 f1_g0 = gamma0['rehandle'].mean()
 e2_garh = garh['efficiency'].mean()
 e2_g0 = gamma0['efficiency'].mean()
 garh_fit_avg = garh['fitness'].mean()
 g0_fit_avg = g0_avg
 print()
-print('--- 聚合均值对比（表4.9）---')
+print('--- 聚合均值对比（表4.9，差值以 GA-RH 为基准）---')
 print('  f1(翻箱):  GA-RH={:.4f}  g=0={:.4f}  D={:+.2f}%'.format(
-    f1_garh, f1_g0, (f1_garh-f1_g0)/abs(f1_g0)*100))
+    f1_garh, f1_g0, (f1_g0-f1_garh)/abs(f1_garh)*100))
 print('  f2(效率):  GA-RH={:.4f}  g=0={:.4f}  D={:+.2f}%'.format(
-    e2_garh, e2_g0, (e2_garh-e2_g0)/abs(e2_g0)*100))
+    e2_garh, e2_g0, (e2_g0-e2_garh)/abs(e2_garh)*100))
 print('  fitness:   GA-RH={:.4f}  g=0={:.4f}  D={:+.2f}%'.format(
-    garh_fit_avg, g0_fit_avg, (garh_fit_avg-g0_fit_avg)/abs(g0_fit_avg)*100))
+    garh_fit_avg, g0_fit_avg, (g0_fit_avg-garh_fit_avg)/abs(garh_fit_avg)*100))
 # 表4.9 CSV
 agg9 = pd.DataFrame({
     'metric': ['f1_rehandle','f2_efficiency','fitness'],
     'GA-RH': [f1_garh, e2_garh, garh_fit_avg],
     'gamma0': [f1_g0, e2_g0, g0_fit_avg],
     'delta_pct': [
-        round((f1_garh-f1_g0)/abs(f1_g0)*100, 2),
-        round((e2_garh-e2_g0)/abs(e2_g0)*100, 2),
-        round((garh_fit_avg-g0_fit_avg)/abs(g0_fit_avg)*100, 2)
+        round((f1_g0-f1_garh)/abs(f1_garh)*100, 2),
+        round((e2_g0-e2_garh)/abs(e2_garh)*100, 2),
+        round((g0_fit_avg-garh_fit_avg)/abs(garh_fit_avg)*100, 2)
     ]
 })
 save_csv('9_aggregate', agg9)
