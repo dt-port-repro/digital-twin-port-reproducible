@@ -80,7 +80,7 @@ if fcfs_rec and stage3_rec:
 # ════════════════════════════════════════
 # 表5.3 PPO协调器
 # ════════════════════════════════════════
-hdr('表5.3 PPO协调器对比')
+hdr('PPO协调器对比（论文表5.2 PPO部分）')
 
 ppo = read_json('output/ppo_results/ppo_results.json')
 print('  {:<6s} {:<20s} {:>10s} {:>12s}'.format(
@@ -127,11 +127,12 @@ with open(out_dir / 'table_5_2_yard.csv', 'w', newline='') as f:
 # 5.3 PPO
 with open(out_dir / 'table_5_2_ppo.csv', 'w', newline='') as f:
     w = csv.writer(f)
-    w.writerow(['窗口', '方法', '累积奖励', 'vs基线提升'])
+    w.writerow(['窗口', '方法', '累积奖励', 'vs基线提升(%)'])
     for w_name in ['w1', 'w2']:
         r = ppo[w_name]
-        w.writerow([w_name, 'PPO动态', r['test_reward'], round(r['test_reward'] - r['baseline_reward'], 1)])
-        w.writerow([w_name, '静态基线(平衡)', r['baseline_reward'], 0])
+        imp_pct = abs(r['test_reward'] - r['baseline_reward']) / abs(r['baseline_reward']) * 100
+        w.writerow([w_name, 'PPO动态', r['test_reward'], round(imp_pct, 1)])
+        w.writerow([w_name, '静态基线(平衡)', r['baseline_reward'], 0.0])
 
 print()
 print('输出文件:')
@@ -141,9 +142,9 @@ print('  ' + str(out_dir / 'table_5_2_ppo.csv'))
 print('Done.')
 
 # ════════════════════════════════════════
-# 表5.2 预测-优化协同效果
+# 补充实验: 预测-协同 (yard integration, 非论文表5.2)
 # ════════════════════════════════════════
-hdr('论文表5.2 预测-优化协同效果评估')
+hdr('补充实验: 预测-优化协同效果 (yard integration)')
 
 integration = read_json('output/lstm_results/prediction_yard_integration.json')
 print('  基于MCT 2024年实际数据的预测-优化协同效果：')
@@ -158,8 +159,9 @@ for w in ['w1', 'w2']:
     print(f'    设备 {bl["equip_util_pct"]:.1f}% -> {wp["equip_util_pct"]:.1f}%')
 
 print()
-print('  [注] 论文表5.2引用值: 翻箱33.9%(8.5%->5.6%), 设备+12.3pp')
-print('  来自第五章独立实验，与本处预测-协同实验数值不同。')
+print('  [注] 论文表5.2引用值: 选位惩罚降低33.9%(selection_results_v2.json),')
+print('  翻箱率-27.0%/设备+5.6%(第六章MAS-DES配置D), PPO提升21.1%/26.8%(ppo_results.json)。')
+print('  本处 prediction_yard_integration 为预测-协同补充实验，数值与论文表5.2 不同。')
 
 # ════════════════════════════════════════
 # 图表文件完整性检查
@@ -182,8 +184,8 @@ for f, desc in ALL_FIGS.items():
 print()
 print('  (图5.2算法流程图, 图5.3协同框架为设计图, 见论文正文)')
 
-# 输出CSV：协同效果
-with open(out_dir / 'table_5_2_collaborative.csv', 'w', newline='') as f:
+# 输出CSV：补充实验（附录编号 S17，非论文表5.2）
+with open(out_dir / 'table_S17_yard_integration.csv', 'w', newline='') as f:
     w = csv.writer(f)
     w.writerow(['窗口', 'MAPE(%)', 'PICP(%)', '基线翻箱(%)', '协同翻箱(%)', '基线设备(%)', '协同设备(%)'])
     for w_name in ['w1', 'w2']:

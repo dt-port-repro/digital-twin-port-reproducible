@@ -1,121 +1,125 @@
 """
-Fig4: 算法可扩展性分析 — 对数求解时间 vs 问题规模
-三条折线：GA-RH(混合算法)、纯GA(传统GA)、SA(模拟退火)
-纵轴对数刻度，展示不同算法的扩展规律
+Fig4.6: 算法可扩展性分析 — 对数求解时间 vs 问题规模（论文图4.6）
+100条船 × 3种算法；x 轴 6 档等距均衡；纵轴对数刻度
+三条幂律拟合虚线 t = a·N^b（指数上标，a 比例系数，与论文文字 t=aNᵇ 一致），统一延伸至 2k-4k 档右缘
 """
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.patheffects import withStroke
 from pathlib import Path
 
 matplotlib.rcParams['font.family'] = ['SimHei', 'Microsoft YaHei', 'Noto Sans SC', 'DejaVu Sans']
 matplotlib.rcParams['axes.unicode_minus'] = False
+matplotlib.rcParams['mathtext.fontset'] = 'dejavusans'
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 OUT = ROOT / 'output' / 'large_scale'
 df = pd.read_parquet(OUT / 'large_scale_results_v2.parquet')
 
 # ============================================================
-# 1. 分箱
+# 1. 分箱 + 等距档位轴（x = 档位序号 0..5，每档等宽）
 # ============================================================
 bins = [400, 600, 800, 1000, 1500, 2000, 4000]
 labels = ['400–600', '600–800', '800–1k', '1k–1.5k', '1.5k–2k', '2k–4k']
-bin_centers = [500, 700, 900, 1250, 1750, 3000]
-
+XPOS = np.arange(6)                 # 档位等距坐标
+N_C = [500, 700, 900, 1250, 1750, 3000]   # 各档中心箱数（仅用于拟合曲线映射）
+C_BND = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5]   # 档边界 -> 箱数边界
+N_BND = [400, 600, 800, 1000, 1500, 2000, 4000]
 df['bin'] = pd.cut(df['n_containers'], bins=bins, labels=labels)
 
-# ============================================================
-# 2. 计算均值
-# ============================================================
-modes = {
-    'GA-RH': 'GA-RH（混合算法）',
-    '纯GA': 'GA（传统遗传算法）',
-    'SA': 'SA（模拟退火）',
-}
-colors = {'GA-RH': '#E74C3C', '纯GA': '#2E86C1', 'SA': '#28B463'}
+modes = {'GA-RH': 'GA-RH（混合算法）', '纯GA': 'GA（传统遗传算法）', 'SA': 'SA（模拟退火）'}
+colors = {'GA-RH': '#D62728', '纯GA': '#1F77B4', 'SA': '#7F7F7F'}
 markers = {'GA-RH': 'o', '纯GA': 's', 'SA': '^'}
 
-fig, ax = plt.subplots(figsize=(10, 6.5))
+fig, ax = plt.subplots(figsize=(10.8, 6.6))
+n_by_bin = df[df['mode'] == 'GA-RH'].groupby('bin')['vessel_code'].count()
 
-# 同时绘制原始数据点（低透明度）和均值折线
+# ============================================================
+# 2. 数据点 + 均值实线（等距档位坐标）
+# ============================================================
 for mode, label in modes.items():
     sub = df[df['mode'] == mode]
-    means, stds = [], []
+    means = []
     for b in labels:
         d = sub[sub['bin'] == b]['time_s']
         means.append(d.mean() if len(d) > 0 else np.nan)
-        stds.append(d.std() if len(d) > 0 else np.nan)
     means = np.array(means)
-    stds = np.array(stds)
 
-    # 散点：所有原始数据点（低透明度）
-    # 加入少量水平抖动避免重叠
     for b_idx, b in enumerate(labels):
         vals = sub[sub['bin'] == b]['time_s'].values
-        jitter = np.random.uniform(-30, 30, size=len(vals))
-        ax.scatter([bin_centers[b_idx]] * len(vals) + jitter, vals,
-                   color=colors[mode], alpha=0.12, s=12, zorder=1)
+        rng = np.random.default_rng(42 + b_idx)
+        jitter = rng.uniform(-0.16, 0.16, size=len(vals))
+        ax.scatter(XPOS[b_idx] + jitter, vals,
+                   color=colors[mode], alpha=0.22 if mode != 'SA' else 0.15,
+                   s=15 if mode != 'SA' else 10, zorder=2)
 
-    # 均值折线
-    ax.plot(bin_centers, means, color=colors[mode], linewidth=2.5,
-            marker=markers[mode], markersize=9, label=label, zorder=3)
-
-    # 标注每箱点数
-    for i, b in enumerate(labels):
-        n = len(sub[sub['bin'] == b])
-        if n > 0 and not np.isnan(means[i]):
-            ax.annotate(f'n={n}', (bin_centers[i], means[i]),
-                        textcoords='offset points', xytext=(0, -22),
-                        fontsize=7, color=colors[mode], ha='center',
-                        alpha=0.6)
+    ax.plot(XPOS, means, color=colors[mode], linewidth=3.0,
+            marker=markers[mode], markersize=9, label=label, zorder=4,
+            markerfacecolor=colors[mode], markeredgecolor='white', markeredgewidth=1.1,
+            path_effects=[withStroke(linewidth=5, foreground='white')])
 
 # ============================================================
-# 3. 拟合趋势线：展示超线性/线性/次线性增长
+# 3. 三条幂律拟合虚线 t = a·N^b，统一延伸至 2k-4k 档右缘 (c=5.5)
 # ============================================================
-# 对GA-RH和纯GA拟合幂律曲线: t = a * N^b
-for mode, color, marker in [('GA-RH', '#E74C3C', 'o'), ('纯GA', '#2E86C1', 's')]:
+fit_results = {}
+# 档位坐标 -> 箱数：对数线性映射（log N 随档位线性），使幂律虚线在 log-y 轴上
+# 接近笔直，超线性斜率(b>1)清晰可辨，与原图虚线形态一致
+c_smooth = np.linspace(-0.5, 5.5, 300)
+logN_s = np.interp(c_smooth, C_BND, np.log10(N_BND))
+N_s = 10 ** logN_s
+for mode, color in [('GA-RH', '#D62728'), ('纯GA', '#1F77B4'), ('SA', '#7F7F7F')]:
     sub = df[df['mode'] == mode]
     x_raw = sub['n_containers'].values
     y_raw = sub['time_s'].values
-    # 对数域线性拟合
     A = np.vstack([np.log(x_raw), np.ones_like(x_raw)]).T
-    coeffs, *_ = np.linalg.lstsq(A, np.log(y_raw), rcond=None)
-    b_exp, ln_a = coeffs
+    b_exp, ln_a = np.linalg.lstsq(A, np.log(y_raw), rcond=None)[0]
     a = np.exp(ln_a)
-    x_fit = np.linspace(400, 4000, 100)
-    y_fit = a * x_fit ** b_exp
-    # 用相同颜色但虚线表示趋势
-    ax.plot(x_fit, y_fit, color=color, linewidth=1.2, linestyle='--',
-            alpha=0.5, zorder=1)
-    # 在图上标注指数
-    mid_idx = len(x_fit) // 2
-    ax.text(x_fit[mid_idx], y_fit[mid_idx] * 1.1,
-            f't ∝ N^{b_exp:.2f}', fontsize=8, color=color, alpha=0.7,
-            style='italic')
+    fit_results[mode] = (a, b_exp)
+    ax.plot(c_smooth, a * N_s ** b_exp, color=color, linewidth=1.8,
+            linestyle='--', alpha=0.95, zorder=3)
+
+# 公式标注（右上空白区：2k-4k 档实测最高 ~1090s，y>1500 无数据）
+ax.text(3.4, 3200, f'$t = aN^{{{fit_results["GA-RH"][1]:.2f}}}$',
+        fontsize=14, color='#D62728', fontweight='bold', ha='center', va='center', zorder=6,
+        path_effects=[withStroke(linewidth=3, foreground='white')])
+ax.text(5.0, 3200, f'$t = aN^{{{fit_results["纯GA"][1]:.2f}}}$',
+        fontsize=14, color='#1F77B4', fontweight='bold', ha='center', va='center', zorder=6,
+        path_effects=[withStroke(linewidth=3, foreground='white')])
+# SA 标注：SA 虚线末端上方（x=5.3 无点带；SA 档5 实测最高 26s）
+ax.text(4.7, 80, f'$t = aN^{{{fit_results["SA"][1]:.2f}}}$',
+        fontsize=12.5, color='#666666', fontweight='bold', ha='center', va='center', zorder=6,
+        path_effects=[withStroke(linewidth=3, foreground='white')])
 
 # ============================================================
-# 4. 对数纵轴 + 美化
+# 4. 坐标与美化
 # ============================================================
 ax.set_yscale('log')
-ax.set_xlabel('Problem Scale (Containers)', fontsize=13, fontweight='bold')
-ax.set_ylabel('Solving Time (seconds, log scale)', fontsize=13, fontweight='bold')
-ax.set_title('Fig. Algorithm Scalability Analysis\n(100 vessels × 3 algorithms, log-scale y-axis)',
-             fontsize=14, fontweight='bold', pad=12)
+ax.set_xlabel('问题规模（集装箱数）', fontsize=14, fontweight='bold')
+ax.set_ylabel('求解时间（秒，对数坐标）', fontsize=14, fontweight='bold')
 
-ax.set_xticks(bin_centers)
-ax.set_xticklabels(labels, fontsize=11)
-ax.tick_params(axis='both', labelsize=11)
-ax.legend(fontsize=11, framealpha=0.9, edgecolor='#CCCCCC', loc='upper left')
-ax.grid(True, alpha=0.3, linestyle='--', which='both')
-ax.set_xlim(350, 4100)
-ax.set_ylim(0.5, 5000)
+ax.set_xticks(XPOS)
+ax.set_xticklabels(labels, fontsize=12)
+ax.tick_params(axis='both', labelsize=12)
+ax.legend(fontsize=12.5, framealpha=0.95, edgecolor='#888888',
+          loc='upper left', borderpad=0.8)
+ax.grid(True, alpha=0.35, linestyle='--', linewidth=0.7, which='both')
+ax.set_xlim(-0.62, 5.8)
+ax.set_ylim(0.5, 6000)
 
-# SA近似常数时间标注
-ax.annotate('SA: near-constant O(1)\n(fast but infeasible)',
-            xy=(2200, 7), fontsize=9, color=colors['SA'],
-            style='italic', alpha=0.7,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='white', edgecolor=colors['SA'], alpha=0.8))
+# n= 样本量标注：每箱一次（底部空白带 y≈0.85，SA 实测最低 1.5s 不重叠）
+for b_idx in range(6):
+    n = int(n_by_bin[labels[b_idx]])
+    ax.text(XPOS[b_idx], 0.85, f'n={n}', fontsize=10, color='#666666',
+            ha='center', va='center', zorder=6)
+
+# SA 注释框：SA 实线下方靠右的空白带（x≈4.5 无点带，y 3~10 < SA 档4 最低 6.7 部分重叠规避，
+# 取 y=5 中心，避开 SA 虚线(此处 ~12s)与散点）
+ax.text(4.15, 3.6, 'SA: 快速但不可行', fontsize=11, color='#4A4A4A',
+        ha='center', va='center', zorder=6,
+        bbox=dict(boxstyle='round,pad=0.4', facecolor='white',
+                  edgecolor='#7F7F7F', alpha=0.95))
 
 plt.tight_layout()
 png_path = OUT / 'fig_scalability.png'
@@ -124,20 +128,10 @@ fig.savefig(png_path, dpi=300, bbox_inches='tight')
 fig.savefig(pdf_path, bbox_inches='tight')
 plt.close()
 
-print(f'✅ 图已保存:')
-print(f'   {png_path}')
-print(f'   {pdf_path}')
-
-# 打印拟合系数
-print()
-print('='*50)
-print('幂律拟合: t = a × N^b')
-print('='*50)
-for mode in ['GA-RH', '纯GA']:
-    sub = df[df['mode'] == mode]
-    x_raw = sub['n_containers'].values
-    y_raw = sub['time_s'].values
-    A = np.vstack([np.log(x_raw), np.ones_like(x_raw)]).T
-    coeffs, *_ = np.linalg.lstsq(A, np.log(y_raw), rcond=None)
-    b, ln_a = coeffs
-    print(f'{mode:>6}:  a={np.exp(ln_a):.2e},  b={b:.3f}  =>  t ∝ N^{b:.2f}')
+print('图已保存:', png_path)
+print('=' * 55)
+print('幂律拟合 t = a × N^b (a 为比例系数，论文文字口径; 虚线均延伸至 2k-4k 档)')
+print('=' * 55)
+for mode in ['GA-RH', '纯GA', 'SA']:
+    a, b = fit_results[mode]
+    print(f'{mode:>6}:  a = {a:.2e},  b = {b:.3f}   =>   t = a·N^{b:.2f}')

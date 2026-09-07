@@ -298,7 +298,7 @@ if not args.quick:
         'table_4_9_aggregate.csv', 'table_4_10_robustness_summary.csv',
         'table_4_11_postproc.csv', 'table_4_12_encoding.csv',
         'table_4_13_summary.csv', 'table_4_14_complexity.csv',
-        'table_5_1_prediction.csv', 'table_5_2_collaborative.csv',
+        'table_5_1_prediction.csv', 'table_5_2_yard.csv',
         'table_5_2_ppo.csv',
         'table_6_4.csv',
         'table_S1_large_scale_binned.csv', 'table_S2_time_vs_scale.csv',
@@ -529,9 +529,9 @@ try:
         s_cols = set(sdf.columns)
         d_cols = set(ddf.columns)
         common_cols = []
-        # GA-RH(exp1) 配对排除 rehandle：canonical 的 rehandle 已由 fitness 公式反推回填
-        # （论文表4.8 GA-RH(f1) 基准），而实验侧 ch4_unified_results 为 bug 修复前运行
-        # （rehandle=0 占位），且 GA 重跑的翻箱指标受随机性影响大，不作为一致性指标。
+        # GA-RH(exp1) 配对排除 rehandle：该指标依据论文定义的适应度公式由
+        # 其余分量计算（见 README 5.3 节说明，对应论文表4.8 GA-RH(f1) 列），
+        # 实验侧重跑的翻箱指标受 GA 随机性影响较大，不作为一致性比较项。
         compare_cols = ['fitness', 'efficiency', 'balance', 'penalty'] \
             if label == 'GA-RH(exp1)' else ['fitness', 'rehandle', 'efficiency', 'balance', 'penalty']
         for canon_col in compare_cols:
